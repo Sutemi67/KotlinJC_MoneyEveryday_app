@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,14 +51,44 @@ fun Income() {
     Column(
         Modifier
             .fillMaxSize()
-            .wrapContentSize()
+            .wrapContentSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "за месяц",
+                fontSize = 20.sp
+            )
+            Text(
+                text = "$summary",
+                fontSize = 50.sp
+            )
+        }
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "в день",
+                fontSize = 20.sp
+            )
+            Text(
+                text = "${summary/30}",
+                fontSize = 50.sp
+            )
+        }
         Text(
-            text = "$summary", Modifier.align(alignment = Alignment.CenterHorizontally)
+            text = input,
+            fontSize = 30.sp
         )
-        Text(
-            text = input, Modifier.align(alignment = Alignment.CenterHorizontally)
-        )
+
+
         Spacer(modifier = Modifier.height(50.dp))
         Row(
             modifier = Modifier
@@ -66,48 +97,51 @@ fun Income() {
             horizontalArrangement = Arrangement.Center
         ) {
             Column {
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
+                Button(onClick = { input += 1.toString() }) {
                     Text(text = "1")
                 }
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
+                Button(onClick = { input += 2.toString() }) {
+                    Text(text = "4")
+                }
+                Button(onClick = { input += 3.toString() }) {
+                    Text(text = "7")
+                }
+            }
+            Column {
+                Button(onClick = { input += 2.toString() }) {
                     Text(text = "2")
                 }
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
+                Button(onClick = { input += 5.toString() }) {
+                    Text(text = "5")
+                }
+                Button(onClick = { input += 8.toString() }) {
+                    Text(text = "8")
+                }
+                Button(onClick = { input += 0.toString() }) {
+                    Text(text = "0")
+                }
+            }
+            Column {
+                Button(onClick = { input += 3.toString() }) {
                     Text(text = "3")
                 }
-            }
-            Column {
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
-                    Text(text = "1")
+                Button(onClick = { input += 6.toString() }) {
+                    Text(text = "6")
                 }
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
-                    Text(text = "2")
-                }
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
-                    Text(text = "2")
-                }
-            }
-            Column {
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
-                    Text(text = "1")
-                }
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
-                    Text(text = "2")
-                }
-                Button(onClick = { input += Button.NUMBER1.toString() }) {
-                    Text(text = "2")
+                Button(onClick = { input += 9.toString() }) {
+                    Text(text = "9")
                 }
             }
 
         }
         Column {
             Button(
-                onClick = { summary += input.toInt() }, Modifier.fillMaxWidth()
+                onClick = { summary += input.toInt();input = "" }, Modifier.fillMaxWidth()
             ) {
                 Text(text = "Прибавить как прибыль")
             }
             Button(
-                onClick = { summary -= input.toInt() }, Modifier.fillMaxWidth()
+                onClick = { summary -= input.toInt();input = "" }, Modifier.fillMaxWidth()
             ) {
                 Text(text = "Вычесть как расходы")
             }
