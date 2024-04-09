@@ -11,7 +11,7 @@ private val Context.dataStore: DataStore<androidx.datastore.preferences.core.Pre
     "data_store"
 )
 
-class DataStoreManager(val context: Context) {
+class DataStoreManager(private val context: Context) {
     suspend fun saveSettings(settingsData: SettingsData) {
         context.dataStore.edit { pref ->
             pref[intPreferencesKey("result")]=settingsData.resultText
