@@ -45,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MoneyEverydayComposeTheme {
+
                 val monthlySummary = remember {
                     mutableIntStateOf(0)
                 }
@@ -60,15 +61,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
     }
-
 }
 
 @Composable
 fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>) {
 
-    var input: String? by remember { mutableStateOf("") }
+    var input: String by remember { mutableStateOf("") }
+
     val coroutine = rememberCoroutineScope()
     Column(
         Modifier
@@ -108,7 +108,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
             )
         }
         Text(
-            text = input ?: "введите сумму", fontSize = 30.sp
+            text = input, fontSize = 30.sp
         )
 
 
@@ -154,7 +154,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
                 Button(onClick = { input += 9.toString() }) {
                     Text(text = "9")
                 }
-                Button(onClick = { input = ""}) {
+                Button(onClick = { input = "" }) {
                     Text(text = "C")
                 }
             }
@@ -167,53 +167,57 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
         ) {
             Button(
                 onClick = {
-                    monthlySummary.value += input?.toInt() ?: 0
-                    coroutine.launch {
-                        dataStoreManager.saveSettings(
-                            SettingsData(
-                                monthlySummary.value
+                    if (input !="") {
+                        monthlySummary.value += input.toInt()
+                        coroutine.launch {
+                            dataStoreManager.saveSettings(
+                                SettingsData(
+                                    monthlySummary.value
+                                )
                             )
-                        )
+                        }
                     }
                     input = ""
                 },
                 Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(Color.Green)
+                colors = ButtonDefaults.buttonColors(Color(0xFF33B042))
             ) {
                 Text(text = "Прибавить как прибыль")
             }
             Button(
                 onClick = {
-                    monthlySummary.value -= input?.toInt() ?: 0
-
-                    coroutine.launch {
-                        dataStoreManager.saveSettings(
-                            SettingsData(
-                                monthlySummary.value
+                    if (input != "") {
+                        monthlySummary.value -= input.toInt()
+                        coroutine.launch {
+                            dataStoreManager.saveSettings(
+                                SettingsData(
+                                    monthlySummary.value
+                                )
                             )
-                        )
+                        }
                     }
                     input = ""
                 },
                 Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(Color.Red)
+                colors = ButtonDefaults.buttonColors(Color(0xFFB03358))
             ) {
                 Text(text = "Вычесть как расходы")
             }
             Button(
                 onClick = {
-                    monthlySummary.value = 0
-
-                    coroutine.launch {
-                        dataStoreManager.saveSettings(
-                            SettingsData(
-                                monthlySummary.value
+                        monthlySummary.value = 0
+                        coroutine.launch {
+                            dataStoreManager.saveSettings(
+                                SettingsData(
+                                    monthlySummary.value
+                                )
                             )
-                        )
-                    }
+                        }
                     input = ""
                 },
-                Modifier.fillMaxWidth().padding(50.dp,0.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(50.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
                 Text(text = "Сбросить")
@@ -225,7 +229,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun GreetingPreview() {
+fun IncomePreview() {
     val dataDataStoreManager = DataStoreManager(MainActivity())
     MoneyEverydayComposeTheme {
         val monthlySummary = remember {
