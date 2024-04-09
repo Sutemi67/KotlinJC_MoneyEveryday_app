@@ -1,5 +1,7 @@
 package com.example.moneyeverydaycompose
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -41,7 +44,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
     }
+
 }
 
 @Composable
@@ -79,7 +84,7 @@ fun Income() {
                 fontSize = 20.sp
             )
             Text(
-                text = "${summary/30}",
+                text = "${summary / 30}",
                 fontSize = 50.sp
             )
         }
@@ -100,10 +105,10 @@ fun Income() {
                 Button(onClick = { input += 1.toString() }) {
                     Text(text = "1")
                 }
-                Button(onClick = { input += 2.toString() }) {
+                Button(onClick = { input += 4.toString() }) {
                     Text(text = "4")
                 }
-                Button(onClick = { input += 3.toString() }) {
+                Button(onClick = { input += 7.toString() }) {
                     Text(text = "7")
                 }
             }
