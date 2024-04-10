@@ -121,41 +121,41 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
         ) {
             Column {
                 Button(onClick = { input += 1.toString() }) {
-                    Text(text = "1")
+                    Text(text = "1", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 4.toString() }) {
-                    Text(text = "4")
+                    Text(text = "4", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 7.toString() }) {
-                    Text(text = "7")
+                    Text(text = "7", fontSize = 25.sp)
                 }
             }
             Column {
                 Button(onClick = { input += 2.toString() }) {
-                    Text(text = "2")
+                    Text(text = "2", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 5.toString() }) {
-                    Text(text = "5")
+                    Text(text = "5", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 8.toString() }) {
-                    Text(text = "8")
+                    Text(text = "8", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 0.toString() }) {
-                    Text(text = "0")
+                    Text(text = "0", fontSize = 25.sp)
                 }
             }
             Column {
                 Button(onClick = { input += 3.toString() }) {
-                    Text(text = "3")
+                    Text(text = "3", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 6.toString() }) {
-                    Text(text = "6")
+                    Text(text = "6", fontSize = 25.sp)
                 }
                 Button(onClick = { input += 9.toString() }) {
-                    Text(text = "9")
+                    Text(text = "9", fontSize = 25.sp)
                 }
                 Button(onClick = { input = "" }) {
-                    Text(text = "C")
+                    Text(text = "C", fontSize = 25.sp)
                 }
             }
 
@@ -167,7 +167,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
         ) {
             Button(
                 onClick = {
-                    if (input !="") {
+                    if (input != "") {
                         monthlySummary.value += input.toInt()
                         coroutine.launch {
                             dataStoreManager.saveSettings(
@@ -182,7 +182,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
                 Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(Color(0xFF33B042))
             ) {
-                Text(text = "Прибавить как прибыль")
+                Text(text = "Прибавить как прибыль", fontSize = 15.sp)
             }
             Button(
                 onClick = {
@@ -201,23 +201,24 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
                 Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(Color(0xFFB03358))
             ) {
-                Text(text = "Вычесть как расходы")
+                Text(text = "Вычесть как расходы", fontSize = 15.sp)
             }
+            Spacer(modifier = Modifier.height(20.dp))
             Button(
                 onClick = {
-                        monthlySummary.value = 0
-                        coroutine.launch {
-                            dataStoreManager.saveSettings(
-                                SettingsData(
-                                    monthlySummary.value
-                                )
+                    monthlySummary.value = 0
+                    coroutine.launch {
+                        dataStoreManager.saveSettings(
+                            SettingsData(
+                                monthlySummary.value
                             )
-                        }
+                        )
+                    }
                     input = ""
                 },
                 Modifier
                     .fillMaxWidth()
-                    .padding(50.dp, 0.dp),
+                    .padding(75.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
                 Text(text = "Сбросить")
