@@ -112,7 +112,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
         )
 
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Row(
             modifier = Modifier
                 .wrapContentSize()
@@ -173,9 +173,9 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
 //                        }
 //                    }
                     input.toIntOrNull()?.let {
-                        monthlySummary.value += input.toInt()
+                        monthlySummary.value += it
                         coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
-                    } ?: 0
+                    } ?: {}
                     input = ""
                 },
                 Modifier.fillMaxWidth(),
@@ -192,9 +192,9 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
 //                        }
 //                    }
                     input.toIntOrNull()?.let {
-                        monthlySummary.value -= input.toInt()
+                        monthlySummary.value -= it
                         coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
-                    } ?: 0
+                    } ?: {}
                     input = ""
                 },
                 Modifier.fillMaxWidth(),
@@ -207,11 +207,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
                 onClick = {
                     monthlySummary.value = 0
                     coroutine.launch {
-                        dataStoreManager.saveSettings(
-                            SettingsData(
-                                monthlySummary.value
-                            )
-                        )
+                        dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
                     }
                     input = ""
                 },
