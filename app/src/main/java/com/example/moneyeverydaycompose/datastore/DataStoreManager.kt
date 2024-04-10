@@ -15,6 +15,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveSettings(settingsData: SettingsData) {
         context.dataStore.edit { pref ->
             pref[intPreferencesKey("result")]=settingsData.resultText
+
         }
     }
     fun getSettings()=context.dataStore.data.map { pref ->

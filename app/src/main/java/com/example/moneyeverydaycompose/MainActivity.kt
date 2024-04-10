@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
                 val monthlySummary = remember {
                     mutableIntStateOf(0)
                 }
+
                 LaunchedEffect(key1 = true) {
                     dataDataStoreManager.getSettings().collect { settings ->
                         monthlySummary.intValue = settings.resultText
@@ -65,7 +66,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>) {
+fun Income(
+    dataStoreManager: DataStoreManager,
+    monthlySummary: MutableState<Int>
+) {
 
     var input: String by remember { mutableStateOf("") }
 
@@ -77,6 +81,7 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Row(
             Modifier
                 .fillMaxWidth()
