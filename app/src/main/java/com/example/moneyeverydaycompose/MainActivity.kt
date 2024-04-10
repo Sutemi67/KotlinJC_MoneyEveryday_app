@@ -167,16 +167,15 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
         ) {
             Button(
                 onClick = {
-                    if (input != "") {
+//                    if (input != "") {
+//                        monthlySummary.value += input.toInt()
+//                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
+//                        }
+//                    }
+                    input.toIntOrNull()?.let {
                         monthlySummary.value += input.toInt()
-                        coroutine.launch {
-                            dataStoreManager.saveSettings(
-                                SettingsData(
-                                    monthlySummary.value
-                                )
-                            )
-                        }
-                    }
+                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
+                    } ?: 0
                     input = ""
                 },
                 Modifier.fillMaxWidth(),
@@ -186,16 +185,16 @@ fun Income(dataStoreManager: DataStoreManager, monthlySummary: MutableState<Int>
             }
             Button(
                 onClick = {
-                    if (input != "") {
+//                    if (input != "") {
+//                        monthlySummary.value -= input.toInt()
+//                        coroutine.launch {
+//                            dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
+//                        }
+//                    }
+                    input.toIntOrNull()?.let {
                         monthlySummary.value -= input.toInt()
-                        coroutine.launch {
-                            dataStoreManager.saveSettings(
-                                SettingsData(
-                                    monthlySummary.value
-                                )
-                            )
-                        }
-                    }
+                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
+                    } ?: 0
                     input = ""
                 },
                 Modifier.fillMaxWidth(),
