@@ -1,5 +1,8 @@
 package com.example.moneyeverydaycompose
 
+import android.annotation.SuppressLint
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,15 +37,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.datastore.DataStoreManager
-import com.example.moneyeverydaycompose.datastore.SettingsData
+import com.example.moneyeverydaycompose.datastore.ResultTextSettings
+import com.example.moneyeverydaycompose.datastore.DateTextSettings
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.days
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dataDataStoreManager = DataStoreManager(this)
+        val dataStoreManager = DataStoreManager(this)
 
         setContent {
             MoneyEverydayComposeTheme {
@@ -50,30 +56,45 @@ class MainActivity : ComponentActivity() {
                     mutableIntStateOf(0)
                 }
 
+                val dateOfClear = remember {
+                    mutableLongStateOf(Calendar.getInstance().timeInMillis)
+                }
+
                 LaunchedEffect(key1 = true) {
-                    dataDataStoreManager.getSettings().collect { settings ->
+                    dataStoreManager.getSummaryText().collect { settings ->
                         monthlySummary.intValue = settings.resultText
+                    }
+                    dataStoreManager.getClearData().collect { setDate ->
+                        dateOfClear.longValue = setDate.
                     }
                 }
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    Income(dataDataStoreManager, monthlySummary)
+                    Income(dataStoreManager, monthlySummary, dateOfClear)
                 }
             }
         }
     }
 }
 
+@SuppressLint("SimpleDateFormat")
 @Composable
 fun Income(
     dataStoreManager: DataStoreManager,
-    monthlySummary: MutableState<Int>
+    monthlySummary: MutableState<Int>,
+    dateOfClear:MutableState<Long>
 ) {
 
     var input: String by remember { mutableStateOf("") }
 
     val coroutine = rememberCoroutineScope()
+
+    val current = Calendar.getInstance().timeInMillis
+    val formatter = SimpleDateFormat("dd MMMM yyyy")
+    val dateCurrent = formatter.format(current)
+
+
     Column(
         Modifier
             .fillMaxSize()
@@ -81,7 +102,36 @@ fun Income(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "дата сброса", fontSize = 20.sp
+            )
+            Text(
+                text = "${monthlySummary.value}",
+                fontSize = 50.sp
+            )
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "сегодня:", fontSize = 20.sp
+            )
+            Text(
+                text = "${monthlySummary.value}",
+                fontSize = 50.sp
+            )
+        }
         Row(
             Modifier
                 .fillMaxWidth()
@@ -172,14 +222,15 @@ fun Income(
         ) {
             Button(
                 onClick = {
-//                    if (input != "") {
-//                        monthlySummary.value += input.toInt()
-//                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
-//                        }
-//                    }
                     input.toIntOrNull()?.let {
                         monthlySummary.value += it
-                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
+                        coroutine.launch {
+                            dataStoreManager.saveSummaryText(
+                                ResultTextSettings(
+                                    monthlySummary.value
+                                )
+                            )
+                        }
                     } ?: {}
                     input = ""
                 },
@@ -190,15 +241,15 @@ fun Income(
             }
             Button(
                 onClick = {
-//                    if (input != "") {
-//                        monthlySummary.value -= input.toInt()
-//                        coroutine.launch {
-//                            dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
-//                        }
-//                    }
                     input.toIntOrNull()?.let {
                         monthlySummary.value -= it
-                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
+                        coroutine.launch {
+                            dataStoreManager.saveSummaryText(
+                                ResultTextSettings(
+                                    monthlySummary.value
+                                )
+                            )
+                        }
                     } ?: {}
                     input = ""
                 },
@@ -212,7 +263,8 @@ fun Income(
                 onClick = {
                     monthlySummary.value = 0
                     coroutine.launch {
-                        dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
+                        dataStoreManager.saveClearDate(DateTextSettings(current))
+                        dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
                     }
                     input = ""
                 },
@@ -228,23 +280,26 @@ fun Income(
 }
 
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun IncomePreview() {
-    val dataDataStoreManager = DataStoreManager(MainActivity())
-    MoneyEverydayComposeTheme {
-        val monthlySummary = remember {
-            mutableIntStateOf(0)
-        }
-        LaunchedEffect(key1 = true) {
-            dataDataStoreManager.getSettings().collect { settings ->
-                monthlySummary.intValue = settings.resultText
-            }
-        }
-        Surface(
-            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-        ) {
-            Income(dataDataStoreManager, monthlySummary)
-        }
-    }
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun IncomePreview() {
+//    val dataStoreManager = DataStoreManager(MainActivity())
+//    MoneyEverydayComposeTheme {
+//        val monthlySummary = remember {
+//            mutableIntStateOf(0)
+//        }
+//        LaunchedEffect(key1 = true) {
+//            dataStoreManager.getSummaryText().collect() { settings ->
+//                monthlySummary.intValue = settings.resultText
+//            }
+//            dataStoreManager.getClearData().collect(){setData ->
+//
+//            }
+//        }
+//        Surface(
+//            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+//        ) {
+//            Income(dataStoreManager, monthlySummary)
+//        }
+//    }
+//}
