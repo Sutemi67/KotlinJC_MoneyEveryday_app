@@ -37,11 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.datastore.DataStoreManager
-import com.example.moneyeverydaycompose.datastore.ResultTextSettings
 import com.example.moneyeverydaycompose.datastore.DateTextSettings
+import com.example.moneyeverydaycompose.datastore.ResultTextSettings
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.days
 
 class MainActivity : ComponentActivity() {
 
@@ -91,8 +90,10 @@ fun Income(
     val coroutine = rememberCoroutineScope()
 
     val current = Calendar.getInstance().timeInMillis
+
     val formatter = SimpleDateFormat("dd MMMM yyyy")
     val dateCurrent = formatter.format(current)
+
 
 
     Column(
@@ -262,10 +263,12 @@ fun Income(
             Button(
                 onClick = {
                     monthlySummary.value = 0
+
                     coroutine.launch {
-                        dataStoreManager.saveClearDate(DateTextSettings(current))
                         dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
+                        dataStoreManager.saveClearDate(DateTextSettings(current))
                     }
+
                     input = ""
                 },
                 Modifier
