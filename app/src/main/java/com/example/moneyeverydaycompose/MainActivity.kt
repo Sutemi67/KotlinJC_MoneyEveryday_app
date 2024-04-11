@@ -94,7 +94,8 @@ fun Income(
 
     val current = Calendar.getInstance().timeInMillis
     val formatter = SimpleDateFormat("dd MMMM yyyy")
-    val daysPass = (current-setDateOfClear.value)/(1000 * 60 * 60 * 24)+1
+    val daysPass = (current - setDateOfClear.value) / (1000 * 60 * 60 * 24) + 1
+
 
     Column(
         Modifier
@@ -148,34 +149,33 @@ fun Income(
                 fontSize = 12.sp
             )
         }
-        Row(
+        Spacer(modifier = Modifier.height(10.dp))
+        Column(
             Modifier
                 .fillMaxWidth()
                 .padding(10.dp, 0.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = "Итог за месяц:", fontSize = 18.sp
+                text = "Итог за период:", fontSize = 18.sp
             )
             Text(
-                text = "${monthlySummary.value}",
+                text = "%,d".format((monthlySummary.value)),
                 fontSize = 50.sp
             )
         }
-        Row(
+        Column(
             Modifier
                 .fillMaxWidth()
                 .padding(10.dp, 0.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment = Alignment.End
         ) {
             Text(
                 text = "В среднем в день",
                 fontSize = 18.sp
             )
             Text(
-                text = "${monthlySummary.value/daysPass }",
+                text = "%,d".format(monthlySummary.value / daysPass),
                 fontSize = 50.sp
             )
         }
@@ -273,7 +273,7 @@ fun Income(
             ) {
                 Text(text = "Вычесть как расходы", fontSize = 15.sp)
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = {
                     monthlySummary.value = 0
@@ -290,7 +290,7 @@ fun Income(
                 },
                 Modifier
                     .fillMaxWidth()
-                    .padding(75.dp, 0.dp),
+                    .padding(105.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
                 Text(text = "Сбросить")
