@@ -1,5 +1,8 @@
 package com.example.moneyeverydaycompose
 
+import android.annotation.SuppressLint
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,7 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.datastore.DataStoreManager
-import com.example.moneyeverydaycompose.datastore.SettingsData
+import com.example.moneyeverydaycompose.datastore.DateTextSettings
+import com.example.moneyeverydaycompose.datastore.ResultTextSettings
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
 import kotlinx.coroutines.launch
 
@@ -41,7 +46,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dataDataStoreManager = DataStoreManager(this)
+        val dataStoreManager = DataStoreManager(this)
 
         setContent {
             MoneyEverydayComposeTheme {
@@ -50,30 +55,48 @@ class MainActivity : ComponentActivity() {
                     mutableIntStateOf(0)
                 }
 
+                val setDateOfClear = remember {
+                    mutableLongStateOf(1111)
+                }
+
                 LaunchedEffect(key1 = true) {
-                    dataDataStoreManager.getSettings().collect { settings ->
+                    dataStoreManager.getClearData().collect { setDate ->
+                        setDateOfClear.longValue = setDate.dateOfClear
+                    }
+                }
+                LaunchedEffect(key1 = true) {
+                    dataStoreManager.getSummaryText().collect { settings ->
                         monthlySummary.intValue = settings.resultText
                     }
                 }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    Income(dataDataStoreManager, monthlySummary)
+                    Income(dataStoreManager, monthlySummary, setDateOfClear)
                 }
             }
         }
     }
 }
 
+@SuppressLint("SimpleDateFormat")
 @Composable
 fun Income(
     dataStoreManager: DataStoreManager,
-    monthlySummary: MutableState<Int>
+    monthlySummary: MutableState<Int>,
+    setDateOfClear: MutableState<Long>
 ) {
 
     var input: String by remember { mutableStateOf("") }
 
     val coroutine = rememberCoroutineScope()
+
+    val current = Calendar.getInstance().timeInMillis
+    val formatter = SimpleDateFormat("dd MMMM yyyy")
+    val daysPass = (current - setDateOfClear.value) / (1000 * 60 * 60 * 24) + 1
+
+
     Column(
         Modifier
             .fillMaxSize()
@@ -81,7 +104,6 @@ fun Income(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Row(
             Modifier
                 .fillMaxWidth()
@@ -90,11 +112,11 @@ fun Income(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "за месяц", fontSize = 20.sp
+                text = "Сегодня:", fontSize = 20.sp
             )
             Text(
-                text = "${monthlySummary.value}",
-                fontSize = 50.sp
+                text = formatter.format(current),
+                fontSize = 20.sp
             )
         }
         Row(
@@ -105,10 +127,55 @@ fun Income(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "в день", fontSize = 20.sp
+                text = "Дата сброса", fontSize = 12.sp
             )
             Text(
-                text = "${monthlySummary.value / 30}",
+                text = formatter.format(setDateOfClear.value),
+                fontSize = 12.sp
+            )
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Дней прошло:", fontSize = 12.sp
+            )
+            Text(
+                text = "$daysPass",
+                fontSize = 12.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = "Итог за период:", fontSize = 18.sp
+            )
+            Text(
+                text = "%,d".format((monthlySummary.value)),
+                fontSize = 50.sp
+            )
+        }
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = "В среднем в день",
+                fontSize = 18.sp
+            )
+            Text(
+                text = "%,d".format(monthlySummary.value / daysPass),
                 fontSize = 50.sp
             )
         }
@@ -117,7 +184,7 @@ fun Income(
         )
 
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier
                 .wrapContentSize()
@@ -172,14 +239,15 @@ fun Income(
         ) {
             Button(
                 onClick = {
-//                    if (input != "") {
-//                        monthlySummary.value += input.toInt()
-//                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
-//                        }
-//                    }
                     input.toIntOrNull()?.let {
                         monthlySummary.value += it
-                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
+                        coroutine.launch {
+                            dataStoreManager.saveSummaryText(
+                                ResultTextSettings(
+                                    monthlySummary.value
+                                )
+                            )
+                        }
                     } ?: {}
                     input = ""
                 },
@@ -190,15 +258,13 @@ fun Income(
             }
             Button(
                 onClick = {
-//                    if (input != "") {
-//                        monthlySummary.value -= input.toInt()
-//                        coroutine.launch {
-//                            dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
-//                        }
-//                    }
                     input.toIntOrNull()?.let {
                         monthlySummary.value -= it
-                        coroutine.launch { dataStoreManager.saveSettings(SettingsData(monthlySummary.value)) }
+                        coroutine.launch {
+                            dataStoreManager.saveSummaryText(
+                                ResultTextSettings(monthlySummary.value)
+                            )
+                        }
                     } ?: {}
                     input = ""
                 },
@@ -207,18 +273,24 @@ fun Income(
             ) {
                 Text(text = "Вычесть как расходы", fontSize = 15.sp)
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = {
                     monthlySummary.value = 0
+                    setDateOfClear.value = current
+
                     coroutine.launch {
-                        dataStoreManager.saveSettings(SettingsData(monthlySummary.value))
+                        dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
                     }
+                    coroutine.launch {
+                        dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear.value))
+                    }
+
                     input = ""
                 },
                 Modifier
                     .fillMaxWidth()
-                    .padding(75.dp, 0.dp),
+                    .padding(105.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
                 Text(text = "Сбросить")
@@ -231,20 +303,29 @@ fun Income(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun IncomePreview() {
-    val dataDataStoreManager = DataStoreManager(MainActivity())
+    val dataStoreManager = DataStoreManager(MainActivity())
     MoneyEverydayComposeTheme {
+
         val monthlySummary = remember {
             mutableIntStateOf(0)
         }
+
+        val dateOfClear = remember {
+            mutableLongStateOf(0)
+        }
+
         LaunchedEffect(key1 = true) {
-            dataDataStoreManager.getSettings().collect { settings ->
+            dataStoreManager.getSummaryText().collect { settings ->
                 monthlySummary.intValue = settings.resultText
+            }
+            dataStoreManager.getClearData().collect { setDate ->
+                dateOfClear.longValue = setDate.dateOfClear
             }
         }
         Surface(
             modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
-            Income(dataDataStoreManager, monthlySummary)
+            Income(dataStoreManager, monthlySummary, dateOfClear)
         }
     }
 }

@@ -1,5 +1,5 @@
 package com.example.moneyeverydaycompose.datastore
 
-data class SettingsData (
+data class ResultTextSettings (
     val resultText:Int
 )
