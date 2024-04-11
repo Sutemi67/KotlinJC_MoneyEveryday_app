@@ -1,6 +1,7 @@
 package com.example.moneyeverydaycompose.datastore
 
 import android.content.Context
+import android.icu.util.Calendar
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -35,7 +36,7 @@ class DataStoreManager(private val context: Context) {
 
     fun getClearData() = context.dataStore.data.map { pref ->
         return@map DateTextSettings(
-            pref[longPreferencesKey("dateOfClear")] ?: 0
+            pref[longPreferencesKey("dateOfClear")] ?: Calendar.getInstance().timeInMillis
         )
     }
 }

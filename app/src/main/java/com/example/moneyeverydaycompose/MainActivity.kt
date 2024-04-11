@@ -55,22 +55,25 @@ class MainActivity : ComponentActivity() {
                     mutableIntStateOf(0)
                 }
 
-                val dateOfClear = remember {
-                    mutableLongStateOf(0)
+                val setDateOfClear = remember {
+                    mutableLongStateOf(1111)
                 }
 
+                LaunchedEffect(key1 = true) {
+                    dataStoreManager.getClearData().collect { setDate ->
+                        setDateOfClear.longValue = setDate.dateOfClear
+                    }
+                }
                 LaunchedEffect(key1 = true) {
                     dataStoreManager.getSummaryText().collect { settings ->
                         monthlySummary.intValue = settings.resultText
                     }
-                    dataStoreManager.getClearData().collect { setDate ->
-                        dateOfClear.longValue = setDate.dateOfClear
-                    }
                 }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    Income(dataStoreManager, monthlySummary, dateOfClear)
+                    Income(dataStoreManager, monthlySummary, setDateOfClear)
                 }
             }
         }
@@ -82,7 +85,7 @@ class MainActivity : ComponentActivity() {
 fun Income(
     dataStoreManager: DataStoreManager,
     monthlySummary: MutableState<Int>,
-    dateOfClear:MutableState<Long>
+    setDateOfClear: MutableState<Long>
 ) {
 
     var input: String by remember { mutableStateOf("") }
@@ -90,9 +93,7 @@ fun Income(
     val coroutine = rememberCoroutineScope()
 
     val current = Calendar.getInstance().timeInMillis
-
     val formatter = SimpleDateFormat("dd MMMM yyyy")
-    val dateCurrent = formatter.format(current)
 
 
 
@@ -103,6 +104,7 @@ fun Income(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Row(
             Modifier
                 .fillMaxWidth()
@@ -114,7 +116,7 @@ fun Income(
                 text = "дата сброса", fontSize = 20.sp
             )
             Text(
-                text = formatter.format(dateOfClear.value),
+                text = formatter.format(setDateOfClear.value),
                 fontSize = 20.sp
             )
         }
@@ -129,7 +131,7 @@ fun Income(
                 text = "сегодня:", fontSize = 20.sp
             )
             Text(
-                text = dateCurrent,
+                text = formatter.format(current),
                 fontSize = 20.sp
             )
         }
@@ -246,9 +248,7 @@ fun Income(
                         monthlySummary.value -= it
                         coroutine.launch {
                             dataStoreManager.saveSummaryText(
-                                ResultTextSettings(
-                                    monthlySummary.value
-                                )
+                                ResultTextSettings(monthlySummary.value)
                             )
                         }
                     } ?: {}
@@ -263,10 +263,14 @@ fun Income(
             Button(
                 onClick = {
                     monthlySummary.value = 0
+                    setDateOfClear.value = current
 
                     coroutine.launch {
                         dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
-                        dataStoreManager.saveClearDate(DateTextSettings(current))
+                        //dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear.value))
+                    }
+                    coroutine.launch {
+                        dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear.value))
                     }
 
                     input = ""
