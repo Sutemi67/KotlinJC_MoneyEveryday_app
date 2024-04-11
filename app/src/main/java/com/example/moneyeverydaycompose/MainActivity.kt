@@ -94,8 +94,7 @@ fun Income(
 
     val current = Calendar.getInstance().timeInMillis
     val formatter = SimpleDateFormat("dd MMMM yyyy")
-
-
+    val daysPass = (current-setDateOfClear.value)/(1000 * 60 * 60 * 24)+1
 
     Column(
         Modifier
@@ -104,7 +103,6 @@ fun Income(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Row(
             Modifier
                 .fillMaxWidth()
@@ -113,22 +111,7 @@ fun Income(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "дата сброса", fontSize = 20.sp
-            )
-            Text(
-                text = formatter.format(setDateOfClear.value),
-                fontSize = 20.sp
-            )
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(10.dp, 0.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "сегодня:", fontSize = 20.sp
+                text = "Сегодня:", fontSize = 20.sp
             )
             Text(
                 text = formatter.format(current),
@@ -143,7 +126,37 @@ fun Income(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "за месяц", fontSize = 20.sp
+                text = "Дата сброса", fontSize = 12.sp
+            )
+            Text(
+                text = formatter.format(setDateOfClear.value),
+                fontSize = 12.sp
+            )
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Дней прошло:", fontSize = 12.sp
+            )
+            Text(
+                text = "$daysPass",
+                fontSize = 12.sp
+            )
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp, 0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Итог за месяц:", fontSize = 18.sp
             )
             Text(
                 text = "${monthlySummary.value}",
@@ -158,10 +171,11 @@ fun Income(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "в день", fontSize = 20.sp
+                text = "В среднем в день",
+                fontSize = 18.sp
             )
             Text(
-                text = "${monthlySummary.value / 30}",
+                text = "${monthlySummary.value/daysPass }",
                 fontSize = 50.sp
             )
         }
@@ -170,7 +184,7 @@ fun Income(
         )
 
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier
                 .wrapContentSize()
@@ -267,7 +281,6 @@ fun Income(
 
                     coroutine.launch {
                         dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
-                        //dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear.value))
                     }
                     coroutine.launch {
                         dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear.value))
