@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val dateOfClear = remember {
-                    mutableLongStateOf(Calendar.getInstance().timeInMillis)
+                    mutableLongStateOf(0)
                 }
 
                 LaunchedEffect(key1 = true) {
@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
                         monthlySummary.intValue = settings.resultText
                     }
                     dataStoreManager.getClearData().collect { setDate ->
-                        dateOfClear.longValue = setDate.
+                        dateOfClear.longValue = setDate.dateOfClear
                     }
                 }
                 Surface(
@@ -113,8 +113,8 @@ fun Income(
                 text = "дата сброса", fontSize = 20.sp
             )
             Text(
-                text = "${monthlySummary.value}",
-                fontSize = 50.sp
+                text = formatter.format(dateOfClear.value),
+                fontSize = 20.sp
             )
         }
         Row(
@@ -128,8 +128,8 @@ fun Income(
                 text = "сегодня:", fontSize = 20.sp
             )
             Text(
-                text = "${monthlySummary.value}",
-                fontSize = 50.sp
+                text = dateCurrent,
+                fontSize = 20.sp
             )
         }
         Row(
@@ -280,26 +280,32 @@ fun Income(
 }
 
 
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun IncomePreview() {
-//    val dataStoreManager = DataStoreManager(MainActivity())
-//    MoneyEverydayComposeTheme {
-//        val monthlySummary = remember {
-//            mutableIntStateOf(0)
-//        }
-//        LaunchedEffect(key1 = true) {
-//            dataStoreManager.getSummaryText().collect() { settings ->
-//                monthlySummary.intValue = settings.resultText
-//            }
-//            dataStoreManager.getClearData().collect(){setData ->
-//
-//            }
-//        }
-//        Surface(
-//            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-//        ) {
-//            Income(dataStoreManager, monthlySummary)
-//        }
-//    }
-//}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun IncomePreview() {
+    val dataStoreManager = DataStoreManager(MainActivity())
+    MoneyEverydayComposeTheme {
+
+        val monthlySummary = remember {
+            mutableIntStateOf(0)
+        }
+
+        val dateOfClear = remember {
+            mutableLongStateOf(0)
+        }
+
+        LaunchedEffect(key1 = true) {
+            dataStoreManager.getSummaryText().collect { settings ->
+                monthlySummary.intValue = settings.resultText
+            }
+            dataStoreManager.getClearData().collect { setDate ->
+                dateOfClear.longValue = setDate.dateOfClear
+            }
+        }
+        Surface(
+            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+        ) {
+            Income(dataStoreManager, monthlySummary, dateOfClear)
+        }
+    }
+}
