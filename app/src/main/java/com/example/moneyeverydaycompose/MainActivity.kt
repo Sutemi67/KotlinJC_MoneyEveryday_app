@@ -96,7 +96,7 @@ fun Income(
 
     val current = Calendar.getInstance().timeInMillis
     val formatter = SimpleDateFormat("dd MMMM yyyy")
-    val daysPass = (current - setDateOfClear.value) / (1000 * 60 * 60 * 24) + 1
+    val daysPass = ((current - setDateOfClear.value) / (1000 * 60 * 60 * 24)) + 1
 
 
     Column(
