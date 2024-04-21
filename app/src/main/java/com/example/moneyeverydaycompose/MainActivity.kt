@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -94,13 +96,14 @@ fun Income(
 
     val current = Calendar.getInstance().timeInMillis
     val formatter = SimpleDateFormat("dd MMMM yyyy")
-    val daysPass = (current - setDateOfClear.value) / (1000 * 60 * 60 * 24) + 1
+    val daysPass = ((current - setDateOfClear.value) / (1000 * 60 * 60 * 24)) + 1
 
 
     Column(
         Modifier
             .fillMaxSize()
-            .wrapContentSize(),
+            .wrapContentSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -290,10 +293,10 @@ fun Income(
                 },
                 Modifier
                     .fillMaxWidth()
-                    .padding(105.dp, 0.dp),
+                    .padding(0.dp, 0.dp,200.dp,0.dp),
                 colors = ButtonDefaults.buttonColors(Color.LightGray)
             ) {
-                Text(text = "Сбросить")
+                Text(text = "Сбросить",fontSize = 10.sp)
             }
         }
     }
