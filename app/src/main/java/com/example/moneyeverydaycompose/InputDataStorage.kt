@@ -4,7 +4,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 data class InputDataStorage(
-   val operations: MutableList<String> = mutableListOf("потрачено 3353 денег","потрачено 3353 денег","потрачено 3353 денег","потрачено 3353 денег","потрачено 3353 денег","потрачено 3353 денег"),
-   val datesOfOperations: MutableList<String> = mutableListOf("22:30","22:30","22:30","22:30","22:30","22:30"),
+   val operations: MutableList<String> = mutableListOf("","","","","","","","","",""),
+   val datesOfOperations: MutableList<String> = mutableListOf("","","","","","","","","",""),
    val time:String = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
 )
