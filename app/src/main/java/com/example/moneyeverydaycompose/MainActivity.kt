@@ -43,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.buildSpannedString
 import com.example.moneyeverydaycompose.datastore.DataStoreManager
 import com.example.moneyeverydaycompose.datastore.DateTextSettings
 import com.example.moneyeverydaycompose.datastore.ResultTextSettings
@@ -286,7 +285,16 @@ fun MainScreen(
                      )
                   }
                } ?: {}
-               input = ""
+               if (dataStorage.operationIndex<5) {
+                  dataStorage.operations[dataStorage.operationIndex] = input
+                  dataStorage.operationIndex++
+                  input = ""
+               }else{
+                  dataStorage.operations[0] = input
+                  //dataStorage.datesOfOperations[0]=dataStorage.dateOfInput
+                  dataStorage.operationIndex=1
+                  input = ""
+               }
             },
             Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(Color(0xFF33B042))
@@ -303,7 +311,15 @@ fun MainScreen(
                      )
                   }
                } ?: {}
-               input = ""
+               if (dataStorage.operationIndex<5) {
+                  dataStorage.operations[dataStorage.operationIndex] = input
+                  dataStorage.operationIndex++
+                  input = ""
+               }else{
+                  dataStorage.operations[0] = input
+                  dataStorage.operationIndex=1
+                  input = ""
+               }
             },
             Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(Color(0xFFB03358))
@@ -339,7 +355,11 @@ fun MainScreen(
 
 @Composable
 fun HistoryScreen(dataStorage: InputDataStorage) {
-   
+   val text = if (dataStorage.operationIndex==0){
+      "операций нет"
+   }else{
+      dataStorage.operations[dataStorage.operationIndex-1]
+   }
    Column(
       Modifier.fillMaxSize(),
       horizontalAlignment = Alignment.CenterHorizontally
@@ -353,8 +373,7 @@ fun HistoryScreen(dataStorage: InputDataStorage) {
          Modifier.fillMaxWidth(),
          horizontalArrangement = Arrangement.SpaceAround
       ){
-         Text(text = "${dataStorage.datesOfOperations[dataStorage.operationIndex]}")
-         Text(text = "${dataStorage.operations[dataStorage.operationIndex]}")
+         Text(text = text)
       }
    }
 }
