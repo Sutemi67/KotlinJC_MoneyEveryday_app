@@ -92,7 +92,7 @@ fun TabScreen(
    dataStoreManager: DataStoreManager,
    monthlySummary: MutableIntState,
    setDateOfClear: MutableLongState,
-   dataStorage:InputDataStorage
+   dataStorage: InputDataStorage
 ) {
    var tabIndex by remember { mutableIntStateOf(0) }
    val tabs = listOf("Главная", "История операций")
@@ -285,16 +285,12 @@ fun MainScreen(
                      )
                   }
                } ?: {}
-               if (dataStorage.operationIndex<5) {
-                  dataStorage.operations[dataStorage.operationIndex] = input
-                  dataStorage.operationIndex++
-                  input = ""
-               }else{
-                  dataStorage.operations[0] = input
-                  //dataStorage.datesOfOperations[0]=dataStorage.dateOfInput
-                  dataStorage.operationIndex=1
-                  input = ""
-               }
+               dataStorage.operations.add(0, "Заработано $input денег")
+               if(dataStorage.operations.size>6)dataStorage.operations.removeAt(dataStorage.operations.size-1)
+               dataStorage.datesOfOperations.add(0,dataStorage.time)
+               if(dataStorage.datesOfOperations.size>6)dataStorage.datesOfOperations.removeAt(dataStorage.datesOfOperations.size-1)
+               input = ""
+               
             },
             Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(Color(0xFF33B042))
@@ -311,15 +307,11 @@ fun MainScreen(
                      )
                   }
                } ?: {}
-               if (dataStorage.operationIndex<5) {
-                  dataStorage.operations[dataStorage.operationIndex] = input
-                  dataStorage.operationIndex++
-                  input = ""
-               }else{
-                  dataStorage.operations[0] = input
-                  dataStorage.operationIndex=1
-                  input = ""
-               }
+               dataStorage.operations.add(0, "Потрачено $input денег")
+               if(dataStorage.operations.size>6)dataStorage.operations.removeAt(dataStorage.operations.size-1)
+               dataStorage.datesOfOperations.add(0,dataStorage.time)
+               if(dataStorage.datesOfOperations.size>6)dataStorage.datesOfOperations.removeAt(dataStorage.datesOfOperations.size-1)
+               input = ""
             },
             Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(Color(0xFFB03358))
@@ -355,11 +347,7 @@ fun MainScreen(
 
 @Composable
 fun HistoryScreen(dataStorage: InputDataStorage) {
-   val text = if (dataStorage.operationIndex==0){
-      "операций нет"
-   }else{
-      dataStorage.operations[dataStorage.operationIndex-1]
-   }
+   
    Column(
       Modifier.fillMaxSize(),
       horizontalAlignment = Alignment.CenterHorizontally
@@ -369,11 +357,48 @@ fun HistoryScreen(dataStorage: InputDataStorage) {
          fontSize = 20.sp,
          textAlign = TextAlign.Center
       )
-      Row (
+      Spacer(modifier = Modifier.height(30.dp))
+      Row(
          Modifier.fillMaxWidth(),
-         horizontalArrangement = Arrangement.SpaceAround
-      ){
-         Text(text = text)
+         horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+         Text(text = dataStorage.operations[0], fontSize = 20.sp)
+         Text(text = dataStorage.datesOfOperations[0], fontSize = 20.sp)
+      }
+      Row(
+         Modifier.fillMaxWidth(),
+         horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+         Text(text = dataStorage.operations[1],fontSize = 18.sp)
+         Text(text = dataStorage.datesOfOperations[1],fontSize = 18.sp)
+      }
+      Row(
+         Modifier.fillMaxWidth(),
+         horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+         Text(text = dataStorage.operations[2],fontSize = 16.sp)
+         Text(text = dataStorage.datesOfOperations[2],fontSize = 16.sp)
+      }
+      Row(
+         Modifier.fillMaxWidth(),
+         horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+         Text(text = dataStorage.operations[3],fontSize = 14.sp)
+         Text(text = dataStorage.datesOfOperations[3],fontSize = 14.sp)
+      }
+      Row(
+         Modifier.fillMaxWidth(),
+         horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+         Text(text = dataStorage.operations[4],fontSize = 12.sp)
+         Text(text = dataStorage.datesOfOperations[4],fontSize = 12.sp)
+      }
+      Row(
+         Modifier.fillMaxWidth(),
+         horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+         Text(text = dataStorage.operations[5],fontSize = 10.sp)
+         Text(text = dataStorage.datesOfOperations[5],fontSize = 10.sp)
       }
    }
 }
