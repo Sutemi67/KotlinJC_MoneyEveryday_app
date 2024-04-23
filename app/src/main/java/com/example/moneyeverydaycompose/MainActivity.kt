@@ -54,6 +54,7 @@ class MainActivity : ComponentActivity() {
    override fun onCreate(savedInstanceState: Bundle?) {
       super.onCreate(savedInstanceState)
       val dataStoreManager = DataStoreManager(this)
+      val operationsData = InputDataStorage()
       
       setContent {
          MoneyEverydayComposeTheme {
@@ -74,6 +75,11 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(key1 = true) {
                dataStoreManager.getSummaryText().collect { settings ->
                   monthlySummary.intValue = settings.resultText
+               }
+            }
+            LaunchedEffect(key1 = true) {
+               dataStoreManager.getLists().collect { set ->
+                  operationsData.operations = set.operations
                }
             }
             
@@ -278,17 +284,16 @@ fun MainScreen(
                input.toIntOrNull()?.let {
                   monthlySummary.value += it
                   coroutine.launch {
-                     dataStoreManager.saveSummaryText(
-                        ResultTextSettings(
-                           monthlySummary.value
-                        )
-                     )
+                     dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
+                     dataStoreManager.saveToDataStore(InputDataStorage(dataStorage.operations))
                   }
                } ?: {}
                dataStorage.operations.add(0, "Заработано $input денег")
-               if(dataStorage.operations.size>10)dataStorage.operations.removeAt(dataStorage.operations.size-1)
-               dataStorage.datesOfOperations.add(0,dataStorage.time)
-               if(dataStorage.datesOfOperations.size>10)dataStorage.datesOfOperations.removeAt(dataStorage.datesOfOperations.size-1)
+               if (dataStorage.operations.size > 10) dataStorage.operations.removeAt(dataStorage.operations.size - 1)
+               dataStorage.datesOfOperations.add(0, dataStorage.time)
+               if (dataStorage.datesOfOperations.size > 10) dataStorage.datesOfOperations.removeAt(
+                  dataStorage.datesOfOperations.size - 1
+               )
                input = ""
                
             },
@@ -302,15 +307,16 @@ fun MainScreen(
                input.toIntOrNull()?.let {
                   monthlySummary.value -= it
                   coroutine.launch {
-                     dataStoreManager.saveSummaryText(
-                        ResultTextSettings(monthlySummary.value)
-                     )
+                     dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
+                     dataStoreManager.saveToDataStore(InputDataStorage(dataStorage.operations))
                   }
                } ?: {}
                dataStorage.operations.add(0, "Потрачено $input денег")
-               if(dataStorage.operations.size>10)dataStorage.operations.removeAt(dataStorage.operations.size-1)
-               dataStorage.datesOfOperations.add(0,dataStorage.time)
-               if(dataStorage.datesOfOperations.size>10)dataStorage.datesOfOperations.removeAt(dataStorage.datesOfOperations.size-1)
+               if (dataStorage.operations.size > 10) dataStorage.operations.removeAt(dataStorage.operations.size - 1)
+               dataStorage.datesOfOperations.add(0, dataStorage.time)
+               if (dataStorage.datesOfOperations.size > 10) dataStorage.datesOfOperations.removeAt(
+                  dataStorage.datesOfOperations.size - 1
+               )
                input = ""
             },
             Modifier.fillMaxWidth(),
@@ -359,74 +365,94 @@ fun HistoryScreen(dataStorage: InputDataStorage) {
       )
       Spacer(modifier = Modifier.height(30.dp))
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
          Text(text = dataStorage.operations[0], fontSize = 24.sp)
          Text(text = dataStorage.datesOfOperations[0], fontSize = 24.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[1],fontSize = 22.sp)
-         Text(text = dataStorage.datesOfOperations[1],fontSize = 22.sp)
+         Text(text = dataStorage.operations[1], fontSize = 22.sp)
+         Text(text = dataStorage.datesOfOperations[1], fontSize = 22.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[2],fontSize = 20.sp)
-         Text(text = dataStorage.datesOfOperations[2],fontSize = 20.sp)
+         Text(text = dataStorage.operations[2], fontSize = 20.sp)
+         Text(text = dataStorage.datesOfOperations[2], fontSize = 20.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[3],fontSize = 18.sp)
-         Text(text = dataStorage.datesOfOperations[3],fontSize = 18.sp)
+         Text(text = dataStorage.operations[3], fontSize = 18.sp)
+         Text(text = dataStorage.datesOfOperations[3], fontSize = 18.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[4],fontSize = 16.sp)
-         Text(text = dataStorage.datesOfOperations[4],fontSize = 16.sp)
+         Text(text = dataStorage.operations[4], fontSize = 16.sp)
+         Text(text = dataStorage.datesOfOperations[4], fontSize = 16.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[5],fontSize = 14.sp)
-         Text(text = dataStorage.datesOfOperations[5],fontSize = 14.sp)
+         Text(text = dataStorage.operations[5], fontSize = 14.sp)
+         Text(text = dataStorage.datesOfOperations[5], fontSize = 14.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[6],fontSize = 12.sp)
-         Text(text = dataStorage.datesOfOperations[6],fontSize = 12.sp)
+         Text(text = dataStorage.operations[6], fontSize = 12.sp)
+         Text(text = dataStorage.datesOfOperations[6], fontSize = 12.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[7],fontSize = 10.sp)
-         Text(text = dataStorage.datesOfOperations[7],fontSize = 10.sp)
+         Text(text = dataStorage.operations[7], fontSize = 10.sp)
+         Text(text = dataStorage.datesOfOperations[7], fontSize = 10.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[8],fontSize = 8.sp)
-         Text(text = dataStorage.datesOfOperations[8],fontSize = 8.sp)
+         Text(text = dataStorage.operations[8], fontSize = 8.sp)
+         Text(text = dataStorage.datesOfOperations[8], fontSize = 8.sp)
       }
       Row(
-         Modifier.fillMaxWidth().padding(5.dp),
+         Modifier
+            .fillMaxWidth()
+            .padding(5.dp),
          horizontalArrangement = Arrangement.SpaceBetween
       ) {
-         Text(text = dataStorage.operations[9],fontSize = 6.sp)
-         Text(text = dataStorage.datesOfOperations[9],fontSize = 6.sp)
+         Text(text = dataStorage.operations[9], fontSize = 6.sp)
+         Text(text = dataStorage.datesOfOperations[9], fontSize = 6.sp)
       }
    }
 }
