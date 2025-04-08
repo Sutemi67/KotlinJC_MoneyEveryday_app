@@ -17,8 +17,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.InputDataStorage
@@ -36,11 +39,23 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
-    dataStoreManager: DataStoreManager,
-    monthlySummary: MutableState<Int>,
-    setDateOfClear: MutableState<Long>,
-    dataStorage: InputDataStorage
+    operationsData: InputDataStorage
 ) {
+    val dataStoreManager = DataStoreManager(LocalContext.current)
+    var monthlySummary by remember { mutableIntStateOf(0) }
+    var setDateOfClear by remember { mutableLongStateOf(1111) }
+
+    LaunchedEffect(Unit) {
+        dataStoreManager.getClearData().collect { setDate ->
+            setDateOfClear = setDate.dateOfClear
+        }
+        dataStoreManager.getSummaryText().collect { settings ->
+            monthlySummary = settings.resultText
+        }
+        dataStoreManager.getLists().collect { set ->
+            operationsData.operations = set.operations
+        }
+    }
 
     var input: String by remember { mutableStateOf("") }
 
@@ -48,7 +63,7 @@ fun MainScreen(
 
     val current = Calendar.getInstance().timeInMillis
     val formatter = SimpleDateFormat("dd MMMM yyyy")
-    val daysPass = ((current - setDateOfClear.value) / (1000 * 60 * 60 * 24)) + 1
+    val daysPass = ((current - setDateOfClear) / (1000 * 60 * 60 * 24)) + 1
 
 
     Column(
@@ -85,7 +100,7 @@ fun MainScreen(
                 text = "Дата сброса", fontSize = 12.sp
             )
             Text(
-                text = formatter.format(setDateOfClear.value),
+                text = formatter.format(setDateOfClear),
                 fontSize = 12.sp
             )
         }
@@ -115,7 +130,7 @@ fun MainScreen(
                 text = "Итог за период:", fontSize = 18.sp
             )
             Text(
-                text = "%,d".format((monthlySummary.value)),
+                text = "%,d".format((monthlySummary)),
                 fontSize = 50.sp
             )
         }
@@ -130,14 +145,11 @@ fun MainScreen(
                 fontSize = 18.sp
             )
             Text(
-                text = "%,d".format(monthlySummary.value / daysPass),
+                text = "%,d".format(monthlySummary / daysPass),
                 fontSize = 50.sp
             )
         }
-        Text(
-            text = input, fontSize = 30.sp
-        )
-
+        Text(text = input, fontSize = 30.sp)
 
         Spacer(modifier = Modifier.height(10.dp))
         Row(
@@ -195,19 +207,19 @@ fun MainScreen(
             Button(
                 onClick = {
                     input.toIntOrNull()?.let {
-                        monthlySummary.value += it
+                        monthlySummary += it
                         coroutine.launch {
-                            dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
-                            dataStoreManager.saveToDataStore(InputDataStorage(dataStorage.operations))
+                            dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary))
+                            dataStoreManager.saveToDataStore(InputDataStorage(operationsData.operations))
                         }
                     } ?: {}
-                    dataStorage.operations.add(0, "Заработано $input денег")
-                    if (dataStorage.operations.size > 10) dataStorage.operations.removeAt(
-                        dataStorage.operations.size - 1
+                    operationsData.operations.add(0, "Заработано $input денег")
+                    if (operationsData.operations.size > 10) operationsData.operations.removeAt(
+                        operationsData.operations.size - 1
                     )
-                    dataStorage.datesOfOperations.add(0, dataStorage.time)
-                    if (dataStorage.datesOfOperations.size > 10) dataStorage.datesOfOperations.removeAt(
-                        dataStorage.datesOfOperations.size - 1
+                    operationsData.datesOfOperations.add(0, operationsData.time)
+                    if (operationsData.datesOfOperations.size > 10) operationsData.datesOfOperations.removeAt(
+                        operationsData.datesOfOperations.size - 1
                     )
                     input = ""
 
@@ -220,19 +232,19 @@ fun MainScreen(
             Button(
                 onClick = {
                     input.toIntOrNull()?.let {
-                        monthlySummary.value -= it
+                        monthlySummary -= it
                         coroutine.launch {
-                            dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
-                            dataStoreManager.saveToDataStore(InputDataStorage(dataStorage.operations))
+                            dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary))
+                            dataStoreManager.saveToDataStore(InputDataStorage(operationsData.operations))
                         }
                     } ?: {}
-                    dataStorage.operations.add(0, "Потрачено $input денег")
-                    if (dataStorage.operations.size > 10) dataStorage.operations.removeAt(
-                        dataStorage.operations.size - 1
+                    operationsData.operations.add(0, "Потрачено $input денег")
+                    if (operationsData.operations.size > 10) operationsData.operations.removeAt(
+                        operationsData.operations.size - 1
                     )
-                    dataStorage.datesOfOperations.add(0, dataStorage.time)
-                    if (dataStorage.datesOfOperations.size > 10) dataStorage.datesOfOperations.removeAt(
-                        dataStorage.datesOfOperations.size - 1
+                    operationsData.datesOfOperations.add(0, operationsData.time)
+                    if (operationsData.datesOfOperations.size > 10) operationsData.datesOfOperations.removeAt(
+                        operationsData.datesOfOperations.size - 1
                     )
                     input = ""
                 },
@@ -244,14 +256,14 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = {
-                    monthlySummary.value = 0
-                    setDateOfClear.value = current
+                    monthlySummary = 0
+                    setDateOfClear = current
 
                     coroutine.launch {
-                        dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary.value))
+                        dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary))
                     }
                     coroutine.launch {
-                        dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear.value))
+                        dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear))
                     }
 
                     input = ""

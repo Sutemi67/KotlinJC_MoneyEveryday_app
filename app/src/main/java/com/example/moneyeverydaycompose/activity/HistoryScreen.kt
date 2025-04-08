@@ -19,7 +19,9 @@ import androidx.compose.ui.unit.sp
 import com.example.moneyeverydaycompose.InputDataStorage
 
 @Composable
-fun HistoryScreen(dataStorage: InputDataStorage) {
+fun HistoryScreen(
+    dataStorage: InputDataStorage
+) {
 
     Column(
         Modifier.fillMaxSize(),
