@@ -1,133 +1,83 @@
 package com.example.moneyeverydaycompose.activity
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import android.content.Context
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.moneyeverydaycompose.InputDataStorage
+import com.example.moneyeverydaycompose.database.AppDatabase
 
 @Composable
 fun HistoryScreen(
-    dataStorage: InputDataStorage
+    context: Context
 ) {
+    val database = remember { AppDatabase.getDatabase(context) }
+    val operations by database.operationDao().getAllOperations().collectAsState(initial = emptyList())
 
     Column(
-        Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
         Text(
-            text = "Последние операции:",
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center
+            text = "История операций",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[0], fontSize = 24.sp)
-            Text(text = dataStorage.datesOfOperations[0], fontSize = 24.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[1], fontSize = 22.sp)
-            Text(text = dataStorage.datesOfOperations[1], fontSize = 22.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[2], fontSize = 20.sp)
-            Text(text = dataStorage.datesOfOperations[2], fontSize = 20.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[3], fontSize = 18.sp)
-            Text(text = dataStorage.datesOfOperations[3], fontSize = 18.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[4], fontSize = 16.sp)
-            Text(text = dataStorage.datesOfOperations[4], fontSize = 16.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[5], fontSize = 14.sp)
-            Text(text = dataStorage.datesOfOperations[5], fontSize = 14.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[6], fontSize = 12.sp)
-            Text(text = dataStorage.datesOfOperations[6], fontSize = 12.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[7], fontSize = 10.sp)
-            Text(text = dataStorage.datesOfOperations[7], fontSize = 10.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[8], fontSize = 8.sp)
-            Text(text = dataStorage.datesOfOperations[8], fontSize = 8.sp)
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = dataStorage.operations[9], fontSize = 6.sp)
-            Text(text = dataStorage.datesOfOperations[9], fontSize = 6.sp)
+
+        if (operations.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Нет операций",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        } else {
+            LazyColumn {
+                items(operations) { operation ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = operation.description,
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = operation.date,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                            Text(
+                                text = "${operation.amount} ₽",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun HistoryScreenPreview() {
-    HistoryScreen(InputDataStorage())
 }

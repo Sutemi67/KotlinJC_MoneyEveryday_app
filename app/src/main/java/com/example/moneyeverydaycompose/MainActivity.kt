@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.moneyeverydaycompose.activity.HistoryScreen
 import com.example.moneyeverydaycompose.activity.MainScreen
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
@@ -27,15 +28,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val operationsData = InputDataStorage()
-
         setContent {
             MoneyEverydayComposeTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    TabScreen(operationsData)
+                    TabScreen()
                 }
             }
         }
@@ -44,10 +43,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TabScreen(operationsData: InputDataStorage) {
+fun TabScreen() {
     val tabs = listOf("Главная", "История операций")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxWidth()) {
         TabRow(
@@ -64,8 +64,8 @@ fun TabScreen(operationsData: InputDataStorage) {
             state = pagerState
         ) { page ->
             when (page) {
-                0 -> MainScreen(operationsData)
-                1 -> HistoryScreen(operationsData)
+                0 -> MainScreen(context = context)
+                1 -> HistoryScreen(context = context)
             }
         }
     }

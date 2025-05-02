@@ -1,7 +1,9 @@
 package com.example.moneyeverydaycompose.activity
 
+import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -28,44 +30,43 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.moneyeverydaycompose.InputDataStorage
-import com.example.moneyeverydaycompose.datastore.DataStoreManager
-import com.example.moneyeverydaycompose.datastore.DateTextSettings
-import com.example.moneyeverydaycompose.datastore.ResultTextSettings
+import com.example.moneyeverydaycompose.database.AppDatabase
+import com.example.moneyeverydaycompose.database.Operation
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
-    operationsData: InputDataStorage
+    context: Context
 ) {
-    val dataStoreManager = DataStoreManager(LocalContext.current)
-    var monthlySummary by remember { mutableIntStateOf(0) }
-    var setDateOfClear by remember { mutableLongStateOf(1111) }
-
-    LaunchedEffect(Unit) {
-        dataStoreManager.getClearData().collect { setDate ->
-            setDateOfClear = setDate.dateOfClear
-        }
-        dataStoreManager.getSummaryText().collect { settings ->
-            monthlySummary = settings.resultText
-        }
-        dataStoreManager.getLists().collect { set ->
-            operationsData.operations = set.operations
-        }
-    }
-
-    var input: String by remember { mutableStateOf("") }
-
     val coroutine = rememberCoroutineScope()
+    val database = remember { AppDatabase.getDatabase(context) }
+
+    var monthlySummary by remember { mutableIntStateOf(0) }
+    var setDateOfClear by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
+    var input: String by remember { mutableStateOf("") }
 
     val current = Calendar.getInstance().timeInMillis
     val formatter = SimpleDateFormat("dd MMMM yyyy")
     val daysPass = ((current - setDateOfClear) / (1000 * 60 * 60 * 24)) + 1
 
-
+    fun savingData(amount: Int, isIncome: Boolean) {
+        coroutine.launch {
+            try {
+                val operation = Operation(
+                    description = if (isIncome) "Заработано $amount денег" else "Потрачено $amount денег",
+                    date = formatter.format(current),
+                    amount = if (isIncome) amount else -amount
+                )
+                database.operationDao().insertOperation(operation)
+                monthlySummary += if (isIncome) amount else -amount
+                Log.d("database", "Операция успешно сохранена: ${operation.description}")
+            } catch (e: Exception) {
+                Log.e("database", "Ошибка при сохранении операции: ${e.message}")
+            }
+        }
+    }
     Column(
         Modifier
             .fillMaxSize()
@@ -130,7 +131,7 @@ fun MainScreen(
                 text = "Итог за период:", fontSize = 18.sp
             )
             Text(
-                text = "%,d".format((monthlySummary)),
+                text = "%,d".format(monthlySummary),
                 fontSize = 50.sp
             )
         }
@@ -159,38 +160,38 @@ fun MainScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             Column {
-                Button(onClick = { input += 1.toString() }) {
+                Button(onClick = { input += "1" }) {
                     Text(text = "1", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 4.toString() }) {
+                Button(onClick = { input += "4" }) {
                     Text(text = "4", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 7.toString() }) {
+                Button(onClick = { input += "7" }) {
                     Text(text = "7", fontSize = 25.sp)
                 }
             }
             Column {
-                Button(onClick = { input += 2.toString() }) {
+                Button(onClick = { input += "2" }) {
                     Text(text = "2", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 5.toString() }) {
+                Button(onClick = { input += "5" }) {
                     Text(text = "5", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 8.toString() }) {
+                Button(onClick = { input += "8" }) {
                     Text(text = "8", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 0.toString() }) {
+                Button(onClick = { input += "0" }) {
                     Text(text = "0", fontSize = 25.sp)
                 }
             }
             Column {
-                Button(onClick = { input += 3.toString() }) {
+                Button(onClick = { input += "3" }) {
                     Text(text = "3", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 6.toString() }) {
+                Button(onClick = { input += "6" }) {
                     Text(text = "6", fontSize = 25.sp)
                 }
-                Button(onClick = { input += 9.toString() }) {
+                Button(onClick = { input += "9" }) {
                     Text(text = "9", fontSize = 25.sp)
                 }
                 Button(onClick = { input = "" }) {
@@ -206,23 +207,10 @@ fun MainScreen(
         ) {
             Button(
                 onClick = {
-                    input.toIntOrNull()?.let {
-                        monthlySummary += it
-                        coroutine.launch {
-                            dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary))
-                            dataStoreManager.saveToDataStore(InputDataStorage(operationsData.operations))
-                        }
-                    } ?: {}
-                    operationsData.operations.add(0, "Заработано $input денег")
-                    if (operationsData.operations.size > 10) operationsData.operations.removeAt(
-                        operationsData.operations.size - 1
-                    )
-                    operationsData.datesOfOperations.add(0, operationsData.time)
-                    if (operationsData.datesOfOperations.size > 10) operationsData.datesOfOperations.removeAt(
-                        operationsData.datesOfOperations.size - 1
-                    )
-                    input = ""
-
+                    input.toIntOrNull()?.let { amount ->
+                        savingData(amount, true)
+                        input = ""
+                    }
                 },
                 Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(Color(0xFF33B042))
@@ -231,22 +219,10 @@ fun MainScreen(
             }
             Button(
                 onClick = {
-                    input.toIntOrNull()?.let {
-                        monthlySummary -= it
-                        coroutine.launch {
-                            dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary))
-                            dataStoreManager.saveToDataStore(InputDataStorage(operationsData.operations))
-                        }
-                    } ?: {}
-                    operationsData.operations.add(0, "Потрачено $input денег")
-                    if (operationsData.operations.size > 10) operationsData.operations.removeAt(
-                        operationsData.operations.size - 1
-                    )
-                    operationsData.datesOfOperations.add(0, operationsData.time)
-                    if (operationsData.datesOfOperations.size > 10) operationsData.datesOfOperations.removeAt(
-                        operationsData.datesOfOperations.size - 1
-                    )
-                    input = ""
+                    input.toIntOrNull()?.let { amount ->
+                        savingData(amount, false)
+                        input = ""
+                    }
                 },
                 Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(Color(0xFFB03358))
@@ -256,16 +232,16 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = {
-                    monthlySummary = 0
-                    setDateOfClear = current
-
                     coroutine.launch {
-                        dataStoreManager.saveSummaryText(ResultTextSettings(monthlySummary))
+                        try {
+                            database.operationDao().deleteAllOperations()
+                            monthlySummary = 0
+                            setDateOfClear = current
+                            Log.d("database", "Все операции удалены")
+                        } catch (e: Exception) {
+                            Log.e("database", "Ошибка при сбросе данных: ${e.message}")
+                        }
                     }
-                    coroutine.launch {
-                        dataStoreManager.saveClearDate(DateTextSettings(setDateOfClear))
-                    }
-
                     input = ""
                 },
                 Modifier
