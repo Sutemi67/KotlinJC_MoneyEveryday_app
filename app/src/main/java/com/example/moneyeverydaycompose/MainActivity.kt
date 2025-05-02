@@ -18,8 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.moneyeverydaycompose.activity.HistoryScreen
-import com.example.moneyeverydaycompose.activity.MainScreen
+import com.example.moneyeverydaycompose.ui.screens.history.HistoryScreen
+import com.example.moneyeverydaycompose.ui.screens.main.MainScreen
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
 import kotlinx.coroutines.launch
 
