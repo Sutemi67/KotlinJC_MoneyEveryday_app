@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moneyeverydaycompose.ui.theme.customType
 
 @Composable
 internal fun ScreenTitle() {
@@ -14,6 +15,7 @@ internal fun ScreenTitle() {
         text = "История операций",
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 16.dp)
+        modifier = Modifier.padding(bottom = 16.dp),
+        style = customType.header
     )
 }

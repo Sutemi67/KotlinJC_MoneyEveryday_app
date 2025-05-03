@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
+import com.example.moneyeverydaycompose.ui.theme.customType
 
 @Composable
 internal fun EmptyStateMessage() {
@@ -18,7 +19,8 @@ internal fun EmptyStateMessage() {
         Text(
             text = "Нет операций",
             fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            style = customType.header
         )
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.moneyeverydaycompose.ui.screens.history.HistoryScreen
 import com.example.moneyeverydaycompose.ui.screens.main.MainScreen
 import com.example.moneyeverydaycompose.ui.theme.MoneyEverydayComposeTheme
+import com.example.moneyeverydaycompose.ui.theme.customType
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -57,7 +58,7 @@ fun TabScreen() {
                 Tab(
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                    text = { Text(title) })
+                    text = { Text(title, style = customType.label) })
             }
         }
         HorizontalPager(
