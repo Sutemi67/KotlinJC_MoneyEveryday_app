@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.moneyeverydaycompose.database.AppDatabase
 import com.example.moneyeverydaycompose.database.Operation
+import com.example.moneyeverydaycompose.database.ResetDate
 import com.example.moneyeverydaycompose.ui.theme.customType
 import kotlinx.coroutines.launch
 
@@ -44,12 +45,18 @@ fun MainScreen(context: Context) {
     val database = remember { AppDatabase.getDatabase(context) }
     val operations =
         database.operationDao().getAllOperations().collectAsState(initial = emptyList())
+    val resetDate = database.resetDateDao().getResetDate().collectAsState(initial = null)
 
     var monthlySummary by remember { mutableIntStateOf(0) }
     var setDateOfClear by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
     var input by remember { mutableStateOf("") }
 
     val current = Calendar.getInstance().timeInMillis
+
+    LaunchedEffect(resetDate.value) {
+        setDateOfClear = resetDate.value?.dateInMillis ?: current
+    }
+
     val daysPass = ((current - setDateOfClear) / MILLISECONDS_IN_DAY).toInt() + 1
 
     LaunchedEffect(operations.value) {
@@ -125,7 +132,8 @@ fun MainScreen(context: Context) {
                         database.operationDao().deleteAllOperations()
                         monthlySummary = 0
                         setDateOfClear = current
-                        Log.d(TAG, "Все операции удалены")
+                        database.resetDateDao().insertResetDate(ResetDate(dateInMillis = current))
+                        Log.d(TAG, "Все операции удалены и дата сброса обновлена")
                     } catch (e: Exception) {
                         Log.e(TAG, "Ошибка при сбросе данных: ${e.message}")
                     }
